@@ -1,0 +1,96 @@
+module Line_Decoder (
+    input wire A,
+    input wire B,
+    input wire C,
+    input wire Enable,
+    output reg [7:0] F
+);
+
+always @(A, B, C, Enable) begin
+    if (Enable) begin
+        case ({A, B, C})
+            3'b000: F = 8'b00000001;
+            3'b001: F = 8'b00000010;
+            3'b010: F = 8'b00000100;
+            3'b011: F = 8'b00001000;
+            3'b100: F = 8'b00010000;
+            3'b101: F = 8'b00100000;
+            3'b110: F = 8'b01000000;
+            3'b111: F = 8'b10000000;
+            default: F = 8'b00000000;
+        endcase
+    end else begin
+        F = 8'b00000000;
+    end
+end
+
+endmodule
+
+
+module tflipflop(CLK, T, RST, Q);
+
+    input CLK, T, RST;
+    output Q;
+    reg Q = 0;
+
+    //Logic
+    always@(posedge CLK or posedge RST) begin
+        if (RST)
+            Q = 0;
+        else if(T) begin
+            Q<= ~Q;
+        end
+    end
+endmodule
+
+module top (CLK, RST, Q);
+    input CLK, RST;
+    output [3:0] Q;
+
+    tflipflop d (CLK, 1'b1, RST, Q[0]);
+    tflipflop c (CLK, Q[0], RST, Q[1]);
+    tflipflop b (CLK, Q[1], & Q[0], RST, Q[2]);
+    tflipflop a (CLK, Q[2] & Q[1] & Q[0], RST, Q[3]);
+endmodule
+
+-------------
+module SevenSegDriver(
+    input wire A, B, C, D
+    output reg [7:0] SevenSegDig
+);
+
+always @(A,B,C,D) begin
+    case (A,B,C,D)
+        4'b0000: SevenSegDig = 8'b00111111; // Display 0
+        4'b0001: SevenSegDig = 8'b00000110; // Display 1
+        4'b0010: SevenSegDig = 8'b01011011; // Display 2
+        4'b0011: SevenSegDig = 8'b01001111; // Display 3
+        4'b0100: SevenSegDig = 8'b01100110; // Display 4
+        4'b0101: SevenSegDig = 8'b01101101; // Display 5
+        4'b0110: SevenSegDig = 8'b01111101; // Display 6
+        4'h0111: SevenSegDig = 8'b00000111; // Display 7
+        4'b1000: SevenSegDig = 8'b01111111; // Display 8
+        4'b1001: SevenSegDig = 8'b01101111; // Display 9
+        4'b1010: SevenSegDig = 8'b01110111; // Display A
+        4'b1011: SevenSegDig = 8'b01111100; // Display B
+        4'b1100: SevenSegDig = 8'b00111001; // Display C
+        4'b1101: SevenSegDig = 8'b01011110; // Display D
+        4'b1110: SevenSegDig = 8'b01111001; // Display E
+        4'b1111: SevenSegDig = 8'b01110001; // Display F
+    endcase
+end
+
+endmodule
+
+
+module Top(
+    input [7:0] Value,
+    output [7:0] SevenSegDig1,
+    output [7:0] SevenSegDig2
+);
+
+SevenSegDriver Unit0(Value[7], Value[6], Value[5], Value[4], SevenSegDig1);
+SevenSegDriver Unit1(Value[3], Value[2], Value[1], Value[0] SevenSegDig2);
+
+endmodule
+

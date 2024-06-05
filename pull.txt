@@ -1,1 +1,1 @@
-pull test txt
+pull test txt and another added text
